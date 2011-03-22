@@ -113,7 +113,7 @@ namespace MCA
                 {
                     if (NewVersion() == VersionStatus.New)
                     {
-                        Console.WriteLine("\nNew minecraft server version available! Use \"install\" to install it.\n");
+                        Console.WriteLine("\nNew minecraft server version available! Use \"install\" to install it\n");
                     }
                 });
             }
@@ -476,12 +476,12 @@ namespace MCA
 
                 if (!externalUpdating)
                 {
-                    Console.WriteLine("Install done.");
+                    Console.WriteLine("Install done");
                 }
                 else
                 {
                     externalUpdating = false;
-                    mcaServer.SendMessage("Install done.", mcaServer.LastCommandSender);
+                    mcaServer.SendMessage("Install done", mcaServer.LastCommandSender);
                 }
 
                 if (wasRunning)
@@ -497,7 +497,7 @@ namespace MCA
             {
                 Tools.Print("No minecraft server found. Downloading...");
                 wc.DownloadFile("http://www.minecraft.net/download/minecraft_server.jar", "minecraft_server.jar");
-                Tools.Print("Finished downloading.");
+                Tools.Print("Finished downloading");
             }
         }
 
@@ -507,7 +507,7 @@ namespace MCA
             {
                 if (MinecraftSettings == null)
                 {
-                    Console.WriteLine("Minecraft server settings not loaded, unable to perform backup.");
+                    Console.WriteLine("Minecraft server settings not loaded, unable to perform backup");
                     return false;
                 }
 
@@ -528,7 +528,7 @@ namespace MCA
             }
             else
             {
-                Console.WriteLine("No backup directory set.");
+                Console.WriteLine("No backup directory set");
                 return false;
             }
         }
@@ -720,11 +720,11 @@ namespace MCA
                 {
                     if (!external)
                     {
-                        Console.WriteLine("Minecraft server already running.");
+                        Console.WriteLine("Minecraft server already running");
                     }
                     else
                     {
-                        mcaServer.SendMessage("Minecraft server already running.", client);
+                        mcaServer.SendMessage("Minecraft server already running", client);
                     }
                 }
             }
@@ -760,7 +760,7 @@ namespace MCA
                             break;
 
                         case VersionStatus.None:
-                            Console.WriteLine("No new version available.");
+                            Console.WriteLine("No new version available");
                             break;
 
                         case VersionStatus.Unable:
@@ -782,7 +782,7 @@ namespace MCA
                             break;
 
                         case VersionStatus.None:
-                            mcaServer.SendMessage("No new version available.", client);
+                            mcaServer.SendMessage("No new version available", client);
                             externalUpdating = false;
                             break;
 
@@ -798,7 +798,7 @@ namespace MCA
                 if (externalUpdating)
                 {
                     InstallDownloadBuffer();
-                    mcaServer.SendMessage("Install done.", client);
+                    mcaServer.SendMessage("Install done", client);
                     externalUpdating = false;
                 }
             }
@@ -819,22 +819,22 @@ namespace MCA
 
                     if (!external)
                     {
-                        Console.WriteLine("Reverted last install.");
+                        Console.WriteLine("Reverted last install");
                     }
                     else
                     {
-                        mcaServer.SendMessage("Reverted last install.", client);
+                        mcaServer.SendMessage("Reverted last install", client);
                     }
                 }
                 else
                 {
                     if (!external)
                     {
-                        Console.WriteLine("No previous version found.");
+                        Console.WriteLine("No previous version found");
                     }
                     else
                     {
-                        mcaServer.SendMessage("No previous version found.", client);
+                        mcaServer.SendMessage("No previous version found", client);
                     }
                 }
             }
@@ -891,7 +891,7 @@ namespace MCA
                     }
                     else
                     {
-                        Console.WriteLine("No backup directory set.");
+                        Console.WriteLine("No backup directory set");
                     }
                 }
                 else if (split.Length >= 3 && split[1] == "dir")
