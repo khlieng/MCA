@@ -466,6 +466,11 @@ namespace MCA
                     StopServer();
                 }
 
+                if (File.Exists("minecraft_server_old.jar"))
+                {
+                    File.Delete("minecraft_server_old.jar");
+                }
+
                 File.Move("minecraft_server.jar", "minecraft_server_old.jar");
 
                 using (Stream s = File.Create("minecraft_server.jar"))
