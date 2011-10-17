@@ -47,6 +47,8 @@ namespace MCA
         static MCAServer mcaServer;
         static MinecraftServerOutputMonitor minecraftServerOutput;
 
+        static Queue<Action> changes;
+
         public const string SETTINGS_FILENAME = "Settings.cfg";
         public const string MINECRAFT_SETTINGS_FILENAME = "server.PROPERTIES";
 
@@ -240,6 +242,8 @@ namespace MCA
             players = new List<string>();
             playtime = new PlaytimeManager("played.bin");
             binds = new BindManager("binds.bin");
+
+            changes = new Queue<Action>();
             
             InitServerOutput();
             p.Start();
@@ -343,7 +347,9 @@ namespace MCA
                 playtime.Save();
 
                 p.StandardInput.WriteLine("stop");
+
                 System.Threading.Thread.Sleep(1000);
+                Console.WriteLine("Terminating server output");
                 minecraftServerOutput.Stop();
 
                 BackupWorld();
@@ -353,6 +359,10 @@ namespace MCA
                     backupTimer = null;
                 }
 
+                PerformChanges();                
+
+                Console.WriteLine("Shutdown done!");
+
                 running = false;
             }
         }
@@ -361,6 +371,35 @@ namespace MCA
         {
             StopServer();            
             RunServer();
+        }
+
+        static void PerformChanges()
+        {
+            if (changes.Count > 0)
+            {
+                Console.WriteLine("Writing config changes");
+            }
+
+            for (int i = 0; i < changes.Count; i++)
+            {
+                Action change = changes.Dequeue();
+
+                bool success = false;
+                while (!success)
+                {
+                    try
+                    {
+                        change();
+                        success = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine("Retrying in 2 sec...");
+                        System.Threading.Thread.Sleep(2000);
+                    }
+                }
+            }
         }
 
         static void LoadOps()
@@ -609,6 +648,9 @@ namespace MCA
 
                 case "levels":
                     return "levels - Lists all available levels";
+
+                case "setlevel":
+                    return "setlevel - Usage: /setlevel <levelname>, sets the current level, restart the server to load it";
                     
                 default:
                     return "No such command :/";
@@ -623,7 +665,7 @@ namespace MCA
                 case "commands":
                     if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
-                        Tell(player, "players, ops, give, get, restart, uptime, id, r, played, bind, unbind, level, levels desc, commands");                      
+                        Tell(player, "players, ops, give, get, restart, uptime, id, r, played, bind, unbind, level, levels, setlevel, desc, commands");                      
                     }
                     else
                     {
@@ -728,6 +770,14 @@ namespace MCA
                         {
                             Tell(player, level);
                         }
+                    }
+                    break;
+
+                case "setlevel":
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase) && split.Length > 1)
+                    {
+                        changes.Enqueue(() => MinecraftSettings["level-name"] = split[1]);
+                        Tell(player, "Level will be set to \"" + split[1] + "\" on the next restart");
                     }
                     break;
 
