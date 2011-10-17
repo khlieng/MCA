@@ -338,7 +338,10 @@ namespace MCA
         static void StopServer()
         {
             if (running)
-            {                
+            {
+                playtime.LogoutAll();
+                playtime.Save();
+
                 p.StandardInput.WriteLine("stop");
                 System.Threading.Thread.Sleep(1000);
                 minecraftServerOutput.Stop();
@@ -349,9 +352,6 @@ namespace MCA
                     backupTimer.Dispose();
                     backupTimer = null;
                 }
-
-                playtime.LogoutAll();
-                playtime.Save();
 
                 running = false;
             }
@@ -376,6 +376,19 @@ namespace MCA
                     {
                         ops.Add(reader.ReadLine());
                     }
+                }
+            }
+        }
+
+        static IEnumerable<string> GetLevels()
+        {
+            string currentDir = Directory.GetCurrentDirectory();
+
+            foreach (var dir in Directory.EnumerateDirectories(currentDir, "*", SearchOption.AllDirectories))
+            {
+                if (File.Exists(dir + "\\level.dat"))
+                {
+                    yield return dir.Substring(currentDir.Length + 1, dir.Length - currentDir.Length - 1).Replace("\\", "/");
                 }
             }
         }
@@ -590,6 +603,12 @@ namespace MCA
                     
                 case "commands":
                     return "commands - Lists all available commands";
+
+                case "level":
+                    return "level - Returns the name of the current level";
+
+                case "levels":
+                    return "levels - Lists all available levels";
                     
                 default:
                     return "No such command :/";
@@ -602,9 +621,9 @@ namespace MCA
             switch (split[0])
             {
                 case "commands":
-                    if (ops.Contains(player))
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
-                        Tell(player, "players, ops, give, get, restart, uptime, id, r, played, bind, unbind, desc, commands");                      
+                        Tell(player, "players, ops, give, get, restart, uptime, id, r, played, bind, unbind, level, levels desc, commands");                      
                     }
                     else
                     {
@@ -618,28 +637,28 @@ namespace MCA
                     break;
 
                 case "give":
-                    if (ops.Contains(player) && split.Length > 4)
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase) && split.Length > 4)
                     {
                         ExecuteCommand(command, null);
                     }
                     break;
 
                 case "get":
-                    if (ops.Contains(player))
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
                         ExecuteCommand("give " + player + " " + string.Join(" ", split, 1, split.Length - 1), null);
                     }
                     break;
 
                 case "restart":
-                    if (ops.Contains(player))
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
                         RestartServer();
                     }
                     break;
 
                 case "uptime":
-                    if (ops.Contains(player))
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
                         Tell(player, Uptime());
                     }
@@ -651,7 +670,7 @@ namespace MCA
                     break;
 
                 case "id":
-                    if (ops.Contains(player))
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
                     {
                         if (split.Length > 1)
                         {
@@ -691,6 +710,24 @@ namespace MCA
                     {
                         binds.Unbind(player, split[1]);
                         binds.Save();
+                    }
+                    break;
+
+                case "level":
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
+                    {
+                        Tell(player, "Current level: " + MinecraftSettings["level-name"]);
+                    }
+                    break;
+
+                case "levels":
+                    if (ops.Contains(player, StringComparer.OrdinalIgnoreCase))
+                    {
+                        Tell(player, "Levels:");
+                        foreach (string level in GetLevels())
+                        {
+                            Tell(player, level);
+                        }
                     }
                     break;
 
@@ -937,6 +974,18 @@ namespace MCA
                 else if (MinecraftSettings == null)
                 {
                     Console.WriteLine("Minecraft server settings not loaded");
+                }
+            }
+            else if (split[0] == "level")
+            {
+                Console.WriteLine("Current level: " + MinecraftSettings["level-name"]);
+            }
+            else if (command == "levels")
+            {
+                Console.WriteLine("Levels:");
+                foreach (string level in GetLevels())
+                {
+                    Console.WriteLine(level);
                 }
             }
             else if (split[0] == "mca")

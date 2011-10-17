@@ -68,9 +68,10 @@ namespace MCA
 
         public void LogoutAll()
         {
-            foreach (string player in loginTimes.Keys)
+            string[] players = loginTimes.Keys.ToArray();
+            for (int i = 0; i < players.Length; i++)
             {
-                PlayerLogout(player);
+                PlayerLogout(players[i]);
             }
         }
 
